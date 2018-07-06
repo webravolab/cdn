@@ -35,7 +35,7 @@ Add the service provider to `config/app.php`:
 Publish the default configuration file:
 
 ```bash
-php artisan vendor:publish webravolav/cdn
+php artisan vendor:publish webravolab/cdn
 ```
 
 ## Dependencies
@@ -117,5 +117,5 @@ No test available yet.
 
 ## License
 
-The MIT License (MIT). Please see [License File](https://github.com/Webravolab/cdn/LICENSE) for more information.
+The MIT License (MIT). Please see [License File](https://github.com/Webravolab/cdn/blob/master/LICENSE) for more information.
 
