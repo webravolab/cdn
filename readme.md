@@ -28,7 +28,7 @@ Add the service provider to `config/app.php`:
 ```php
 'providers' => array(
      //...
-     Webravolav\Cdn\CdnServiceProvider::class,
+     Webravolab\Cdn\CdnServiceProvider::class,
 ),
 ```
 
