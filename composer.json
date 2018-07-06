@@ -1,10 +1,10 @@
 {
-    "name": "Webravolab/Cdn",
+    "name": "webravolab/cdn",
     "description": "Webravo custom CDN assets manager",
     "license": "MIT",
     "authors": [
         {
-            "name": "Paolo Nardini",
+            "name": "Paolo Nardini - Webravo",
             "email": "paolo.nardini@gmail.com"
         }
     ],
