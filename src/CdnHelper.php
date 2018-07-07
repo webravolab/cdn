@@ -49,7 +49,7 @@ class CdnHelper implements CdnHelperInterface
     }
 
     public function getConfiguration() {
-       $configuration = $this->_configurations->get('webravo_cdn');
+        $configuration = $this->_configurations->get('webravo_cdn');
         if (!$configuration) {
             throw new \Exception("CDN 'config file' (webravo_cdn.php) not found");
         }
@@ -67,7 +67,7 @@ class CdnHelper implements CdnHelperInterface
 
         // default parameters
         $param_quality = 90;
-        $param_type = 'jpg';
+        $param_type = '';
         $param_size = '';
         $param_background = '';
         $param_mode = 'size';
@@ -106,7 +106,7 @@ class CdnHelper implements CdnHelperInterface
                         $bg = $param_background;
                     }
                     else {
-                        $bg = 'transparent';
+                        $bg = '';
                     }
                     break;
             }
@@ -118,7 +118,13 @@ class CdnHelper implements CdnHelperInterface
                     $param_type = strtolower($param_type);
                     break;
                 default:
-                    $param_type = 'jpg';
+                    $a_parts = pathinfo($path);
+                    if (isset($a_parts['extension']) && in_array($a_parts['extension'], $this->_image_types)) {
+                        $param_type = $a_parts['extension'];
+                    }
+                    else {
+                        $param_type = 'jpg';
+                    }
                     break;
             }
             $real_file_name = $this->checkImageFileExists($path);
