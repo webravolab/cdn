@@ -12,6 +12,7 @@ use Webravolab\Cdn\Contracts\CdnHelperInterface;
 use Webravolab\Cdn\Contracts\ProviderFactoryInterface;
 use Gregwar\Image\Image as Image;
 use Illuminate\Config\Repository;
+use Log;
 
 class CdnHelper implements CdnHelperInterface
 {
@@ -132,11 +133,8 @@ class CdnHelper implements CdnHelperInterface
                         $real_file_name = $o_tmp->getFallback();
                     }
                 }
-                $real_file_modified_time = time();
             }
-            else {
-                $real_file_modified_time = filemtime($real_file_name);
-            }
+            $real_file_modified_time = filemtime($real_file_name);
             $o_image = Image::open($real_file_name);
             if ($width > 0 && $height > 0) {
                 switch ($param_mode) {
@@ -199,7 +197,8 @@ class CdnHelper implements CdnHelperInterface
             }
         }
         catch (\Exception $e) {
-            return null;
+            Log::error('CdnHelper / processImage Error:' . $e->getMessage());
+            return 'error.jpg';
         }
     }
 

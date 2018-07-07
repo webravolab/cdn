@@ -99,6 +99,7 @@ class WebravoProvider extends CdnAbstractProvider implements CdnProviderInterfac
             return null;
         }
         catch (\Exception $e) {
+            Log::error('WebravoProvider / upload Error:' . $e->getMessage());
             return null;
         }
     }
