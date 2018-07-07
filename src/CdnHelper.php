@@ -122,10 +122,21 @@ class CdnHelper implements CdnHelperInterface
             }
             $real_file_name = $this->checkImageFileExists($path);
             if (empty($real_file_name)) {
-                // Image file not found // TODO
-                return null;
+                // Image not found ... get fallback image
+                $fallback = $this->getConfiguration()['fallback_image'];
+                if (!empty($fallback)) {
+                    $real_file_name = $this->checkImageFileExists($fallback);
+                    if (empty($real_file_name)) {
+                        // Last chance ... use Image fallback
+                        $o_tmp = Image::create(100, 100);
+                        $real_file_name = $o_tmp->getFallback();
+                    }
+                }
+                $real_file_modified_time = time();
             }
-            $real_file_modified_time = filemtime($real_file_name);
+            else {
+                $real_file_modified_time = filemtime($real_file_name);
+            }
             $o_image = Image::open($real_file_name);
             if ($width > 0 && $height > 0) {
                 switch ($param_mode) {
@@ -169,7 +180,7 @@ class CdnHelper implements CdnHelperInterface
             }
             else {
                 // Use a custom image name
-                $file_name = $param_name;
+                $file_name = $this->checkExtension($param_name, $param_type);
                 $pretty_name = public_path($file_name);
                 if ($new_or_updated || !file_exists($pretty_name)) {
                     $cache_file_name = $o_image->cacheFile($param_type, $param_quality);
@@ -237,5 +248,16 @@ class CdnHelper implements CdnHelperInterface
         catch (\Exception $e) {
             return null;
         }
+    }
+
+    protected function checkExtension($file_name, $extension) {
+        $a_parts = pathinfo($file_name);
+        if (isset($a_parts['extension']) && in_array($a_parts['extension'], $this->_image_types)) {
+            if (!empty($extension) && $a_parts['extension'] != $extension) {
+                // Replace file name extension
+                $file_name = str_ireplace($a_parts['extension'], $extension, $file_name);
+            }
+        }
+        return $file_name;
     }
 }

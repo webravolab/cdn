@@ -23,6 +23,17 @@ return [
     */
     'default' => 'Webravo',
 
+    /*
+    |--------------------------------------------------------------------------
+    | Custom fallback image
+    |--------------------------------------------------------------------------
+    |
+    | A fallback image for not found images
+    |
+    | (Enter the full path starting from public directory)
+    |
+    */
+    'fallback_image' => '/img/fallback.png',
 
     /*
     |--------------------------------------------------------------------------
@@ -66,7 +77,7 @@ return [
     | CDN Providers specific configurations
     |--------------------------------------------------------------------------
     |
-    | Note: Credentials must be set in the .env file:
+    | Note: Credentials could be set in the .env file:
     |         CDN_WEBRAVO_KEY
     |         CDN_WEBRAVO_PASSWORD
     |
