@@ -14,6 +14,14 @@
         "gregwar/image": "2.*",
         "guzzlehttp/guzzle": "^6.0"
     },
+    "autoload": {
+        "classmap": [
+            "src"
+        ],
+        "psr-4": {
+            "Webravolab\\Cdn\\": "src/"
+        }
+    },
     "config": {
         "preferred-install": "dist"
     }
