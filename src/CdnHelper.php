@@ -129,6 +129,9 @@ class CdnHelper implements CdnHelperInterface
                 case 'black':
                     $bg = 0x000000;
                     break;
+                case 'transparent':
+                    $bg = $param_background;
+                    break;
                 default:
                     if (substr($param_background,0,1) == '#') {
                         $bg = '0x' . substr($param_background,1);
