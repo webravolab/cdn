@@ -69,11 +69,14 @@ class CdnHelper implements CdnHelperInterface
         $param_quality = 90;
         $param_type = '';
         $param_size = '';
+        $param_position = '';
         $param_background = '';
         $param_mode = 'size';
         $param_name = null;
         $width = 0;
         $height = 0;
+        $posX = 0;
+        $posY = 0;
         $is_animated_gif = false;
 
         try {
@@ -104,6 +107,16 @@ class CdnHelper implements CdnHelperInterface
                 } else {
                     $width = $a_size[0];
                     $height = $a_size[1];
+                }
+            }
+            if (!empty($param_position)) {
+                $a_size = explode('x', $param_position);
+                if (count($a_size) < 2 && !isIntegerPositive($a_size[0]) && !isIntegerPositive($a_size[2])) {
+                    $posX = 0;
+                    $posY = 0;
+                } else {
+                    $posX = $a_size[0];
+                    $posY = $a_size[1];
                 }
             }
             if (empty($param_quality) || $param_quality == 0) {
@@ -161,13 +174,20 @@ class CdnHelper implements CdnHelperInterface
                 if ($width > 0 && $height > 0) {
                     switch (strtolower($param_mode)) {
                         case 'resize':
-                            $o_image->resize($width, $height);
+                            $o_image->resize($width, $height, $bg);
+                            break;
+                        case 'forceresize':
+                            $o_image->forceResize($width, $height, $bg);
                             break;
                         case 'zoom':
+                            $o_image->zoom($width, $height, $bg);
+                            break;
                         case 'zoomcrop':
-                            $o_image->zoomCrop($width, $height, $bg);
+                            $o_image->zoomCrop($width, $height, $bg, $posX, $posY);
                             break;
                         case 'crop':
+                            $o_image->crop($posX, $posY, $width, $height);
+                            break;
                         case 'cropresize':
                             $o_image->cropResize($width, $height, $bg);
                             break;
