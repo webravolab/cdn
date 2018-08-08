@@ -73,6 +73,8 @@ class CdnHelper implements CdnHelperInterface
         $param_background = '';
         $param_mode = 'size';
         $param_name = null;
+        $param_crop_mode = 'auto';
+        $param_threshold = 0.5;
         $width = 0;
         $height = 0;
         $posX = 0;
@@ -105,13 +107,16 @@ class CdnHelper implements CdnHelperInterface
                     $width = 0;
                     $height = 0;
                 } else {
-                    $width = $a_size[0];
-                    $height = $a_size[1];
+                    $width = 0 + $a_size[0];
+                    $height = 0 + $a_size[1];
                 }
             }
             if (!empty($param_position)) {
-                $a_size = explode('x', $param_position);
-                if (count($a_size) < 2 && !isIntegerPositive($a_size[0]) && !isIntegerPositive($a_size[2])) {
+                $param_position = str_replace('x',',', $param_position);
+                $param_position = str_replace(';',',', $param_position);
+                $param_position = str_replace('-',',', $param_position);
+                $a_size = explode(',', $param_position);
+                if (count($a_size) < 2) {
                     $posX = 0;
                     $posY = 0;
                 } else {
@@ -140,7 +145,7 @@ class CdnHelper implements CdnHelperInterface
                         $bg = $param_background;
                     }
                     else {
-                        $bg = '';
+                        $bg = $param_background;
                     }
                     break;
             }
@@ -168,6 +173,7 @@ class CdnHelper implements CdnHelperInterface
             }
 
             $o_image = Image::open($real_file_name);
+            $o_image->setAdapter(new Adapters\GD_extended());
 
             if (!$is_animated_gif) {
                 // ANIMATED GIF! Don't process with Gregwar/image and copy "as is"
@@ -198,13 +204,22 @@ class CdnHelper implements CdnHelperInterface
                         case 'scaleresize':
                             $o_image->scaleResize($width, $height, $bg);
                             break;
+                        case 'resizecanvas':
+                            $o_image->resizeCanvas($width, $height, $posX, $posY, $bg);
+                            break;
+                        case 'cropauto':
+                            if (!empty($param_threshold)) {
+                                $param_threshold = 0 + $param_threshold;
+                            }
+                            $o_image->cropAuto($param_crop_mode, $param_threshold, $bg);
+                            $o_image->resizeCanvas($width, $height, $posX, $posY, $bg);
+                            break;
                     }
                 }
-                if (!empty($bg)) {
+                if (!empty($bg) && $bg != 'transparent') {
                     $o_image->fillBackground($bg);
                 }
             }
-
             $new_or_updated = true;
             $cache_system = $o_image->getCacheSystem();
             $hash = $o_image->getHash($param_type, $param_quality);
