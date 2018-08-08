@@ -140,6 +140,7 @@ class GD_extended extends GD
         }
         $r_new = imagecropauto($this->resource, $mode, $threshold, ImageColor::gdAllocate($this->resource, $bg));
         if ($r_new !== false) {
+            imagesavealpha($r_new, TRUE);
             $this->resource = $r_new;
         }
     }

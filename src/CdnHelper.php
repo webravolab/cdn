@@ -212,6 +212,7 @@ class CdnHelper implements CdnHelperInterface
                                 $param_threshold = 0 + $param_threshold;
                             }
                             $o_image->cropAuto($param_crop_mode, $param_threshold, $bg);
+                            $o_image->fillBackground($bg);
                             $o_image->resizeCanvas($width, $height, $posX, $posY, $bg);
                             break;
                     }
