@@ -189,7 +189,7 @@ class CdnHelper implements CdnHelperInterface
                             $o_image->forceResize($width, $height, $bg);
                             break;
                         case 'zoom':
-                            $o_image->zoom($width, $height, $bg);
+                            $o_image->zoomCrop($width, $height, $bg);
                             break;
                         case 'zoomcrop':
                             $o_image->zoomCrop($width, $height, $bg, $posX, $posY);
