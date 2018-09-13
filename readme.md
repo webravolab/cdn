@@ -73,8 +73,18 @@ To disable CDN and load your assets from local machine for testing purposes, set
 'bypass' => true,
 ```
 
-## Usage
+##### Don't overwrite CDN images if source is missing 
+ 
+As per default, missing images are replaced by a fallback image (overwrite = true by default). 
+To change this behaviour set overwrite to false in your configuration file. 
 
+```php
+'overwrite' => false,
+```
+
+Overwrite flag could be passed also as optional parameter to any Cdn:: call.
+ 
+## Usage
 
 ```blade
 {{ Cdn::image('/img/image.png') }}
@@ -82,7 +92,7 @@ To disable CDN and load your assets from local machine for testing purposes, set
 *simplest example without any option* 
 
 ```blade
-{{ Cdn::image('/img/source-image.png', ['name' => '/images/cdn-image.png', 'type' => 'png', 'mode' => 'resize', 'size' => '150x100', 'background' => 'black']) }}
+{{ Cdn::image('/img/source-image.png', ['name' => '/images/cdn-image.png', 'type' => 'png', 'mode' => 'resize', 'size' => '150x100', 'background' => 'black', 'overwrite' => true]) }}
 ```
 *complex image transform and custom name*
 

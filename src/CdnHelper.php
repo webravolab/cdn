@@ -74,27 +74,38 @@ class CdnHelper implements CdnHelperInterface
         $param_mode = 'size';
         $param_name = null;
         $param_crop_mode = 'auto';
+        $param_overwrite = $this->_provider->overwrite();
         $param_threshold = 0.5;
         $width = 0;
         $height = 0;
         $posX = 0;
         $posY = 0;
         $is_animated_gif = false;
+        $is_fallback = false;
 
         try {
             extract($a_params, EXTR_OVERWRITE + EXTR_PREFIX_ALL, 'param');
 
             $real_file_name = $this->checkImageFileExists($path);
             if (empty($real_file_name)) {
-                // Image not found ... get fallback image
-                $fallback = $this->getConfiguration()['fallback_image'];
-                if (!empty($fallback)) {
-                    $real_file_name = $this->checkImageFileExists($fallback);
-                    if (empty($real_file_name)) {
-                        // Last chance ... use Image fallback
-                        $o_tmp = Image::create(100, 100);
-                        $real_file_name = $o_tmp->getFallback();
+                // Image not found ...
+                if ($param_overwrite) {
+                    // Overwrite mode - get fallback image
+                    $is_fallback = true;
+                    $fallback = $this->getConfiguration()['fallback_image'];
+                    if (!empty($fallback)) {
+                        $real_file_name = $this->checkImageFileExists($fallback);
+                        if (empty($real_file_name)) {
+                            // Last chance ... use Image fallback
+                            $o_tmp = Image::create(100, 100);
+                            $real_file_name = $o_tmp->getFallback();
+                        }
                     }
+                }
+                else {
+                    // Ovewrite mode disabled ... return the cdn image name without any check
+                    $file_name = $this->checkExtension($param_name, $param_type);
+                    return $this->makeAssetUrl($file_name);
                 }
             }
             // Check image last modified date and image extension
@@ -229,7 +240,7 @@ class CdnHelper implements CdnHelperInterface
             if (file_exists(public_path($cache_file_name))) {
                 // Check image last modification date
                 $modified_time = filemtime($cache_file_name);
-                if ($modified_time >= $real_file_modified_time) {
+                if (!$is_fallback && $modified_time >= $real_file_modified_time) {
                     // Processed image is already up to date
                     $new_or_updated = false;
                     $file_name = $cache_file_name;
@@ -245,6 +256,11 @@ class CdnHelper implements CdnHelperInterface
                 // Use a custom image name
                 $file_name = $this->checkExtension($param_name, $param_type);
                 $pretty_name = public_path($file_name);
+                if (!$new_or_updated && file_exists($pretty_name)) {
+                    if (filesize($cache_file_name) != filesize($pretty_name)) {
+                        $new_or_updated = true;
+                    }
+                }
                 if ($new_or_updated || !file_exists($pretty_name)) {
                     $cache_file_name = $o_image->cacheFile($param_type, $param_quality);
                     if ($is_animated_gif) {
@@ -260,6 +276,10 @@ class CdnHelper implements CdnHelperInterface
                     }
                     // Must be updated on CDN
                     $new_or_updated = true;
+                    if ($is_fallback) {
+                        // Set a very old modification time for fallback images to allow overwrite next time
+                        touch($cache_file_name, 1000000);
+                    }
                 }
             }
             if ($new_or_updated && !$this->_provider->bypass()) {

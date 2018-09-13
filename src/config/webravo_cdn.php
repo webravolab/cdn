@@ -15,6 +15,23 @@ return [
     */
     'bypass' => false,
 
+
+    /*
+    |--------------------------------------------------------------------------
+    | Overwrite not existing images
+    |--------------------------------------------------------------------------
+    |
+    | This option determines whether to overwrite the CDN image with the fallback
+    | image if the given source image is not existing.
+    | Set it to "false" to keep the last CDN version of image even if the source
+    | has been deleted.
+    |
+    | Default: true
+    |
+    */
+    'overwrite' => true,
+
+
     /*
     |--------------------------------------------------------------------------
     | Default CDN provider

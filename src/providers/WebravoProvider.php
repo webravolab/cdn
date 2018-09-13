@@ -19,11 +19,15 @@ class WebravoProvider extends CdnAbstractProvider implements CdnProviderInterfac
     protected $_cdn_url;
     protected $_cdn_upload_url;
     protected $_bypass = false;
+    protected $_overwrite = true;
 
     public function init($configuration) {
         $this->_configuration = $configuration;
         if (isset($configuration['bypass'])) {
             $this->_bypass = $configuration['bypass'];
+        }
+        if (isset($configuration['overwrite'])) {
+            $this->_overwrite = $configuration['overwrite'];
         }
         if (isset($configuration['providers'])) {
             $providers = $configuration['providers'];
@@ -47,6 +51,16 @@ class WebravoProvider extends CdnAbstractProvider implements CdnProviderInterfac
     {
         return $this->_bypass;
     }
+
+    /**
+     * Return the current status of overwrite flag
+     * @return bool
+     */
+    public function overwrite():bool
+    {
+        return $this->_overwrite;
+    }
+
 
     /**
      * Upload one single file to CDN
