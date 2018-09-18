@@ -256,11 +256,14 @@ class CdnHelper implements CdnHelperInterface
                 // Use a custom image name
                 $file_name = $this->checkExtension($param_name, $param_type);
                 $pretty_name = public_path($file_name);
+                // Don't check for file size because sometimes doesn't work! - 2018-08-19 <PN>
+                /*
                 if (!$new_or_updated && file_exists($pretty_name)) {
                     if (filesize($cache_file_name) != filesize($pretty_name)) {
                         $new_or_updated = true;
                     }
                 }
+                */
                 if ($new_or_updated || !file_exists($pretty_name)) {
                     $cache_file_name = $o_image->cacheFile($param_type, $param_quality);
                     if ($is_animated_gif) {
