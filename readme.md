@@ -83,7 +83,17 @@ To change this behaviour set overwrite to false in your configuration file.
 ```
 
 Overwrite flag could be passed also as optional parameter to any Cdn:: call.
+
+##### Check for file size changes 
+  
+ As per default, file size is not checked to detect image changes, but only modification date is used. 
+ To enable file size check set checksize to true in your configuration file. 
  
+ ```php
+ 'checksize' => true,
+ ```
+Checksize flag could be passed also as optional parameter to any Cdn:: call.
+
 ## Usage
 
 ```blade

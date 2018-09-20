@@ -15,5 +15,6 @@ abstract class CdnAbstractProvider implements CdnProviderInterface
     abstract public function upload($asset_path, $remote_path = null);
     abstract public function delete($remote_path);
     abstract public function exists($assets):bool;
-
+    abstract public function overwrite():bool;
+    abstract public function checksize():bool;
 }

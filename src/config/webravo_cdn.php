@@ -34,6 +34,22 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Check modified images by file size
+    |--------------------------------------------------------------------------
+    |
+    | This option determines whether the image file will be checked also for size
+    |   to determine if image has changed
+    | Set it to "true" to enable file size check.
+    | Warning: this option may speed-up the processing, but may results in unpredictable
+    |   behaviours if images files are not strictly unique
+    |
+    | Default: false
+    |
+    */
+    'checksize' => false,
+
+    /*
+    |--------------------------------------------------------------------------
     | Default CDN provider
     |--------------------------------------------------------------------------
     |

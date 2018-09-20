@@ -75,6 +75,7 @@ class CdnHelper implements CdnHelperInterface
         $param_name = null;
         $param_crop_mode = 'auto';
         $param_overwrite = $this->_provider->overwrite();
+        $param_checksize = $this->_provider->checksize();
         $param_threshold = 0.5;
         $width = 0;
         $height = 0;
@@ -256,14 +257,19 @@ class CdnHelper implements CdnHelperInterface
                 // Use a custom image name
                 $file_name = $this->checkExtension($param_name, $param_type);
                 $pretty_name = public_path($file_name);
-                // Don't check for file size because sometimes doesn't work! - 2018-08-19 <PN>
-                /*
-                if (!$new_or_updated && file_exists($pretty_name)) {
-                    if (filesize($cache_file_name) != filesize($pretty_name)) {
-                        $new_or_updated = true;
+                if ($param_checksize && !$is_animated_gif && !$is_fallback) {
+                    // If enabled, check also for file size changes
+                    if (!$new_or_updated && file_exists($pretty_name)) {
+                        $cache_size = filesize($cache_file_name);
+                        $pretty_size = filesize($pretty_name);
+                        if ($cache_size != $pretty_size) {
+                            Log::debug('Cdn: image size changes');
+                            Log::debug($cache_file_name . ' - ' . $cache_size . ' - date: ' . date(DATE_RFC822, $modified_time));
+                            Log::debug($pretty_name . ' - ' . $pretty_size . ' - date: ' . date(DATE_RFC822, $real_file_modified_time));
+                            $new_or_updated = true;
+                        }
                     }
                 }
-                */
                 if ($new_or_updated || !file_exists($pretty_name)) {
                     $cache_file_name = $o_image->cacheFile($param_type, $param_quality);
                     if ($is_animated_gif) {
@@ -275,7 +281,10 @@ class CdnHelper implements CdnHelperInterface
                         copy($real_file_name, $pretty_name);
                     }
                     else {
-                        $o_image->save($pretty_name, $param_type, $param_quality);
+                        // Copy the file from cache ... don't save it again - 2018-08-20 <PN>
+                        $this->assureDirectoryExists($pretty_name);
+                        copy($cache_file_name, $pretty_name);
+                        // $o_image->save($pretty_name, $param_type, $param_quality);
                     }
                     // Must be updated on CDN
                     $new_or_updated = true;
@@ -379,13 +388,11 @@ class CdnHelper implements CdnHelperInterface
 
     protected function assureDirectoryExists($file_name)
     {
-        $a_parts = parse_url($file_name);
-        if (isset($a_parts['path'])) {
-            $directory = public_path(dirname($a_parts['path']));
-            if (!is_dir($directory)) {
-                @mkdir($directory, 0777, true);
-            }
+        $directory = dirname($file_name);
+        if (!is_dir($directory)) {
+            @mkdir($directory, 0777, true);
         }
+        return;
     }
 
     protected function isGifAnimated($file_name):int

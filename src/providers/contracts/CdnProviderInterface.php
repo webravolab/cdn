@@ -16,4 +16,6 @@ interface CdnProviderInterface
     public function delete($remote_path);
     public function exists($assets):bool;
     public function bypass():bool;
+    public function overwrite():bool;
+    public function checksize():bool;
 }

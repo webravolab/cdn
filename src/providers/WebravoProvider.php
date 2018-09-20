@@ -19,7 +19,8 @@ class WebravoProvider extends CdnAbstractProvider implements CdnProviderInterfac
     protected $_cdn_url;
     protected $_cdn_upload_url;
     protected $_bypass = false;
-    protected $_overwrite = true;
+    protected $_overwrite = true;       // overwrite missing images - default true
+    protected $_check_size = false;     // check changed images also by file size - default false
 
     public function init($configuration) {
         $this->_configuration = $configuration;
@@ -28,6 +29,9 @@ class WebravoProvider extends CdnAbstractProvider implements CdnProviderInterfac
         }
         if (isset($configuration['overwrite'])) {
             $this->_overwrite = $configuration['overwrite'];
+        }
+        if (isset($configuration['checksize'])) {
+            $this->_check_size = $configuration['checksize'];
         }
         if (isset($configuration['providers'])) {
             $providers = $configuration['providers'];
@@ -61,6 +65,15 @@ class WebravoProvider extends CdnAbstractProvider implements CdnProviderInterfac
         return $this->_overwrite;
     }
 
+    /**
+     * Return the current status of check_size flag
+     * @return bool
+     */
+    public function checksize():bool
+    {
+        return $this->_check_size;
+    }
+
 
     /**
      * Upload one single file to CDN
@@ -72,7 +85,7 @@ class WebravoProvider extends CdnAbstractProvider implements CdnProviderInterfac
             if ($this->_bypass) {
                 return null;
             }
-            Log::debug('Client: Uploading ' . $relative_path);
+            Log::debug('CDN Client: Uploading ' . $relative_path);
             if (!file_exists(public_path($relative_path))) {
                 return null;
             }
