@@ -110,7 +110,7 @@ class CdnHelper implements CdnHelperInterface
                 }
             }
             // Check image last modified date and image extension
-            $real_file_modified_time = filemtime($real_file_name);
+            $real_file_modified_time = @filemtime($real_file_name);
             $real_extension = $this->getImageExtension($path);
 
             if (!empty($param_size)) {
@@ -240,8 +240,8 @@ class CdnHelper implements CdnHelperInterface
             $cache_file_name = $cache_system->getCacheFile($cache_file_name);
             if (file_exists(public_path($cache_file_name))) {
                 // Check image last modification date
-                $modified_time = filemtime($cache_file_name);
-                if (!$is_fallback && $modified_time >= $real_file_modified_time) {
+                $modified_time = @filemtime($cache_file_name);
+                if (!$is_fallback && ($modified_time !== false && $real_file_modified_time !== false && $modified_time >= $real_file_modified_time)) {
                     // Processed image is already up to date
                     $new_or_updated = false;
                     $file_name = $cache_file_name;
