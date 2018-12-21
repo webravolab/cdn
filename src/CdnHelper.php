@@ -347,9 +347,16 @@ class CdnHelper implements CdnHelperInterface
                 if (file_exists($real_file_name)) {
                     return $real_file_name;
                 }
+                if (file_exists($path)) {
+                    return $path;
+                }
             }
             foreach ($this->_image_types as $type) {
                 $real_file_name = public_path($a_parts['dirname'] . '/' . $a_parts['filename'] . '.' . $type);
+                if (file_exists($real_file_name)) {
+                    return $real_file_name;
+                }
+                $real_file_name = $a_parts['dirname'] . '/' . $a_parts['filename'] . '.' . $type;
                 if (file_exists($real_file_name)) {
                     return $real_file_name;
                 }
