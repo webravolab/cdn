@@ -235,6 +235,7 @@ class CdnHelper implements CdnHelperInterface
             }
             $new_or_updated = true;
             $cache_system = $o_image->getCacheSystem();
+            $cache_system->setCacheDirectory(public_path('cache/images'));
             $hash = $o_image->getHash($param_type, $param_quality);
             $cache_file_name = $hash . '.' . $param_type;
             $cache_file_name = $cache_system->getCacheFile($cache_file_name);
