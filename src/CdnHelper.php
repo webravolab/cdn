@@ -239,7 +239,7 @@ class CdnHelper implements CdnHelperInterface
             $hash = $o_image->getHash($param_type, $param_quality);
             $cache_file_name = $hash . '.' . $param_type;
             $cache_file_name = $cache_system->getCacheFile($cache_file_name);
-            if (file_exists(public_path($cache_file_name))) {
+            if (file_exists($cache_file_name)) {
                 // Check image last modification date
                 $modified_time = @filemtime($cache_file_name);
                 if (!$is_fallback && ($modified_time !== false && $real_file_modified_time !== false && $modified_time >= $real_file_modified_time)) {
