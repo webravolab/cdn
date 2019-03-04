@@ -50,7 +50,7 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Default CDN provider
+    | Default CDN provider ("Webravo" or "GoogleStorage")
     |--------------------------------------------------------------------------
     |
     */
@@ -120,6 +120,10 @@ return [
             'url' => 'http://www.cdn.test',
             'upload_url' => 'http://www.cdn.test/cdn/upload',
         ],
+        'GoogleStorage' => [
+            'bucket' => 'GS_bucket_name_here',
+            'ttl' => '86400'
+        ]
     ],
 
 ];

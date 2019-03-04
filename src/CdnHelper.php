@@ -317,10 +317,21 @@ class CdnHelper implements CdnHelperInterface
     /**
      * Wrapper to provider upload
      * @param $file_name
+     * @param $remote_file_name
      * @return mixed
      */
-    public function uploadImageToCdn($file_name) {
-        return $this->_provider->upload($file_name);
+    public function uploadImageToCdn($file_name, $remote_file_name = null) {
+        return $this->_provider->upload($file_name, $remote_file_name);
+    }
+
+
+    /**
+     * @param $remote_file_name
+     * @return bool
+     */
+    public function removeImageFromCdn($remote_file_name):bool
+    {
+        return $this->_provider->delete($remote_file_name);
     }
 
     /**

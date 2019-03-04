@@ -18,7 +18,9 @@ interface CdnHelperInterface
 
     public function processImage($path, array $a_params);
 
-    public function uploadImageToCdn($file_name);
+    public function uploadImageToCdn($file_name, $remote_file_name = null);
+
+    public function removeImageFromCdn($remote_file_name):bool;
 
     public function makeAssetUrl($file_name);
 

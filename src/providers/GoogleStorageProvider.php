@@ -2,25 +2,31 @@
 namespace Webravolab\Cdn\Providers;
 
 /**
- * class WebravoProvider
+ * class GoogleStorageProvider
  *
- * Custom CDN provider for Webravo
+ * Custom CDN provider for Google Storage Bucket
  *
  * @author   Paolo Nardini <paolo.nardini@gmail.com>
  */
-use Webravolab\Cdn\Providers\Contracts\CdnProviderInterface;
-use GuzzleHttp\Client;
-use GuzzleHttp\Psr7\Request;
-use Log;
 
-class WebravoProvider extends CdnAbstractProvider implements CdnProviderInterface
+use Webravo\Persistence\Service\CdnService;
+use Webravo\Persistence\Service\ConfigurationService;
+use Webravo\Infrastructure\Library\DependencyBuilder;
+use Webravolab\Cdn\Providers\Contracts\CdnProviderInterface;
+use Webravo\Infrastructure\Service\CdnServiceInterface;
+
+class GoogleStorageProvider extends CdnAbstractProvider implements CdnProviderInterface
 {
+    protected $_cdn_service = null;
+    protected $_log_service = null;
     protected $_configuration;
     protected $_cdn_url;
     protected $_cdn_upload_url;
     protected $_bypass = false;
     protected $_overwrite = true;       // overwrite missing images - default true
     protected $_check_size = false;     // check changed images also by file size - default false
+    protected $_bucket = null;
+    protected $_ttl = 86400;
 
     public function init($configuration) {
         $this->_configuration = $configuration;
@@ -33,17 +39,24 @@ class WebravoProvider extends CdnAbstractProvider implements CdnProviderInterfac
         if (isset($configuration['checksize'])) {
             $this->_check_size = $configuration['checksize'];
         }
-        if (isset($configuration['providers'])) {
-            $providers = $configuration['providers'];
-            if (isset($providers['Webravo'])) {
-                if (isset($providers['Webravo']['url'])) {
-                    $this->_cdn_url = $this->stripTrailingSlashFromPath($providers['Webravo']['url']);
-                }
-                if (isset($providers['Webravo']['upload_url'])) {
-                    $this->_cdn_upload_url = $this->stripTrailingSlashFromPath($providers['Webravo']['upload_url']);
+        if (isset($configuration['default']) && $configuration['default'] == 'GoogleStorage') {
+            // Get configuration overrides
+            if (isset($configuration['providers'])) {
+                $providers = $configuration['providers'];
+                if (isset($providers['GoogleStorage'])) {
+                    if (isset($providers['GoogleStorage']['bucket'])) {
+                        $this->_bucket = $providers['GoogleStorage']['bucket'];
+                    }
+                    if (isset($providers['GoogleStorage']['ttl'])) {
+                        $this->_ttl = $providers['GoogleStorage']['ttl'];
+                    }
                 }
             }
         }
+
+        // Initialize Google CDN Service
+        $this->_cdn_service = DependencyBuilder::resolve('Webravo\Infrastructure\Service\CdnServiceInterface');
+        $this->_log_service = DependencyBuilder::resolve('Psr\Log\LoggerInterface');
         return $this;
     }
 
@@ -78,15 +91,15 @@ class WebravoProvider extends CdnAbstractProvider implements CdnProviderInterfac
     /**
      * Upload one single file to CDN
      *
-     * @param $path             file path absolute or relative to public directory
-     * @param $remote_path      remote uploaded file path (relative to cdn root)
+     * @param $path         file path relative to public directory
      */
     public function upload($path, $remote_path = null) {
         try {
             if ($this->_bypass) {
                 return null;
             }
-            Log::debug('CDN Client: Uploading ' . $path);
+            // Log::debug('CDN Client: Uploading ' . $path);
+            $this->_log_service->debug('[WebravoLab][Cdn][GoogleStorageProvider][Upload] Uploading ' . $path);
             if (file_exists(public_path($path))) {
                 $absolute_path = public_path($path);
                 $relative_path = $path;
@@ -98,12 +111,12 @@ class WebravoProvider extends CdnAbstractProvider implements CdnProviderInterfac
                     $relative_path = mb_substr($path, $public_pos + 6);
                 }
                 else {
-                    Log::warning('CDN Client: invalid relative path ' . $path);
+                    $this->_log_service->warning('[WebravoLab][Cdn][GoogleStorageProvider][Upload] invalid relative path ' . $path);
                     $relative_path = $path;
                 }
             }
             else {
-                Log::critical('CDN Client: invalid source path ' . $path);
+                $this->_log_service->error('[WebravoLab][Cdn][GoogleStorageProvider][Upload] invalid source path ' . $path);
                 return null;
             }
             $a_parts = pathinfo($absolute_path);
@@ -111,39 +124,15 @@ class WebravoProvider extends CdnAbstractProvider implements CdnProviderInterfac
                 return null;
             }
             $fileName = $a_parts['filename'] . '.' . $a_parts['extension'];
-            $local_url = $this->addTrailingSlashToPath(env('APP_URL')) . $this->stripLeadingSlashFromPath($relative_path);
-            $url = $this->_cdn_upload_url . '?url=' . urlencode($local_url);
-            if (!empty($remote_path)) {
-                $url = $url . '&remote_url=' . urlencode($remote_path);
-            } else {
-                // Remote path is the same of local
+            if (empty($remote_path)) {
                 $remote_path = $relative_path;
             }
-            $client = new Client();
-            $options = [
-                'allow_redirects' => false,
-                'headers' => [
-                    'User-Agent' => 'Bravo Assets Agent ' . env('LOCALE_VIEW') . ' 1.0',
-                    'Accept' => 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8'
-                ]
-            ];
-            $res = $client->request('GET', $url, $options);
-            $status_code = $res->getStatusCode();
-            if ($status_code == 301 || $status_code == 302) {
-                // Try again following the redirect
-                $url = $res->getHeader('Location')[0];
-                $res = $client->request('GET', $url, $options);
-                $status_code = $res->getStatusCode();
-            }
-            if ($status_code == 200) {
-                // Return full path
-                $remote_path = $this->_cdn_url . '/' . $this->stripLeadingSlashFromPath($remote_path);
-                return $remote_path;
-            }
-            return null;
+            $remote_path = $this->_cdn_service->uploadImageToCdn($absolute_path, $remote_path, $this->_bucket);
+
+            return $remote_path;
         }
         catch (\Exception $e) {
-            Log::error('WebravoProvider / upload Error:' . $e->getMessage());
+            $this->_log_service->error('[WebravoLab][Cdn][GoogleStorageProvider][Upload] upload error: ' . $e->getMessage());
             return null;
         }
     }
@@ -154,19 +143,28 @@ class WebravoProvider extends CdnAbstractProvider implements CdnProviderInterfac
      * @param $asset_path
      * @return string
      */
-    public function getAssetUrl($asset_path) {
+    public function getAssetUrl($asset_path)
+    {
         if ($this->_bypass) {
             // Don't use CDN
             return $this->addTrailingSlashToPath(env('APP_URL')) . $this->stripLeadingSlashFromPath($asset_path);
         }
         else {
+            // TODO
             return $this->_cdn_url . '/' . $this->stripLeadingSlashFromPath($asset_path);
         }
     }
 
-    public function delete($remote_path):bool {
-        // TODO
-        return false;
+    public function delete($remote_path):bool
+    {
+        try {
+            $this->_log_service->error('[WebravoLab][Cdn][GoogleStorageProvider][Delete] delete remote file ' . $remote_path);
+            return $this->_cdn_service->deleteImageFromCdn($remote_path, $this->_bucket);
+        }
+        catch (\Exception $e) {
+            $this->_log_service->error('[WebravoLab][Cdn][GoogleStorageProvider][Delete] delete error: ' . $e->getMessage());
+            return false;
+        }
     }
 
     public function exists($assets):bool {
