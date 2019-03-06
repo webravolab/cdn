@@ -19,8 +19,8 @@ class GoogleStorageProvider extends CdnAbstractProvider implements CdnProviderIn
 {
     protected $_cdn_service = null;
     protected $_log_service = null;
-    protected $_configuration;
-    protected $_cdn_url;
+    protected $_configuration = null;
+    protected $_cdn_url = null;
     protected $_cdn_upload_url;
     protected $_bypass = false;
     protected $_overwrite = true;       // overwrite missing images - default true
@@ -29,34 +29,46 @@ class GoogleStorageProvider extends CdnAbstractProvider implements CdnProviderIn
     protected $_ttl = 86400;
 
     public function init($configuration) {
-        $this->_configuration = $configuration;
-        if (isset($configuration['bypass'])) {
-            $this->_bypass = $configuration['bypass'];
-        }
-        if (isset($configuration['overwrite'])) {
-            $this->_overwrite = $configuration['overwrite'];
-        }
-        if (isset($configuration['checksize'])) {
-            $this->_check_size = $configuration['checksize'];
-        }
-        if (isset($configuration['default']) && $configuration['default'] == 'GoogleStorage') {
-            // Get configuration overrides
-            if (isset($configuration['providers'])) {
-                $providers = $configuration['providers'];
-                if (isset($providers['GoogleStorage'])) {
-                    if (isset($providers['GoogleStorage']['bucket'])) {
-                        $this->_bucket = $providers['GoogleStorage']['bucket'];
-                    }
-                    if (isset($providers['GoogleStorage']['ttl'])) {
-                        $this->_ttl = $providers['GoogleStorage']['ttl'];
+        if (is_null($this->_configuration)) {
+            $this->_configuration = $configuration;
+            if (isset($configuration['bypass'])) {
+                $this->_bypass = $configuration['bypass'];
+            }
+            if (isset($configuration['overwrite'])) {
+                $this->_overwrite = $configuration['overwrite'];
+            }
+            if (isset($configuration['checksize'])) {
+                $this->_check_size = $configuration['checksize'];
+            }
+            if (isset($configuration['default']) && $configuration['default'] == 'GoogleStorage') {
+                // Get configuration overrides
+                if (isset($configuration['providers'])) {
+                    $providers = $configuration['providers'];
+                    if (isset($providers['GoogleStorage'])) {
+                        if (isset($providers['GoogleStorage']['bucket'])) {
+                            $this->_bucket = $providers['GoogleStorage']['bucket'];
+                        }
+                        if (isset($providers['GoogleStorage']['ttl'])) {
+                            $this->_ttl = $providers['GoogleStorage']['ttl'];
+                        }
+                        if (isset($providers['GoogleStorage']['url'])) {
+                            $this->_cdn_url = $providers['GoogleStorage']['url'] . '/' . $this->_bucket;
+                        }
                     }
                 }
             }
         }
+        if (is_null($this->_cdn_url) && !empty($this->_bucket)) {
+            $this->_cdn_url = "https://storage.googleapis.com/" . $this->_bucket;
+        }
 
         // Initialize Google CDN Service
-        $this->_cdn_service = DependencyBuilder::resolve('Webravo\Infrastructure\Service\CdnServiceInterface');
-        $this->_log_service = DependencyBuilder::resolve('Psr\Log\LoggerInterface');
+        if (is_null($this->_cdn_service)) {
+            $this->_cdn_service = DependencyBuilder::resolve('Webravo\Infrastructure\Service\CdnServiceInterface');
+        }
+        if (is_null($this->_log_service)) {
+            $this->_log_service = DependencyBuilder::resolve('Psr\Log\LoggerInterface');
+        }
         return $this;
     }
 
@@ -127,9 +139,8 @@ class GoogleStorageProvider extends CdnAbstractProvider implements CdnProviderIn
             if (empty($remote_path)) {
                 $remote_path = $relative_path;
             }
-            $remote_path = $this->_cdn_service->uploadImageToCdn($absolute_path, $remote_path, $this->_bucket);
-
-            return $remote_path;
+            $media_path = $this->_cdn_service->uploadImageToCdn($absolute_path, $remote_path, $this->_bucket);
+            return $this->getAssetUrl($remote_path);
         }
         catch (\Exception $e) {
             $this->_log_service->error('[WebravoLab][Cdn][GoogleStorageProvider][Upload] upload error: ' . $e->getMessage());
@@ -150,7 +161,6 @@ class GoogleStorageProvider extends CdnAbstractProvider implements CdnProviderIn
             return $this->addTrailingSlashToPath(env('APP_URL')) . $this->stripLeadingSlashFromPath($asset_path);
         }
         else {
-            // TODO
             return $this->_cdn_url . '/' . $this->stripLeadingSlashFromPath($asset_path);
         }
     }

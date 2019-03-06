@@ -249,50 +249,53 @@ class CdnHelper implements CdnHelperInterface
                 }
             }
             if (empty($param_name)) {
-                // No custom image name ... use cache name
+                // No custom image name ... use a computed name
+                $file_name = md5($path) . '.' . $param_type;
+                /*
                 if ($new_or_updated) {
-                    $file_name = $o_image->cacheFile($param_type, $param_quality);
+                    $file_name = hash($path) . '.' . $param_type;
                 }
+                */
             }
             else {
                 // Use a custom image name
                 $file_name = $this->checkExtension($param_name, $param_type);
-                $pretty_name = public_path($file_name);
-                if ($param_checksize && !$is_animated_gif && !$is_fallback) {
-                    // If enabled, check also for file size changes
-                    if (!$new_or_updated && file_exists($pretty_name)) {
-                        $cache_size = filesize($cache_file_name);
-                        $pretty_size = filesize($pretty_name);
-                        if ($cache_size != $pretty_size) {
-                            Log::debug('Cdn: image size changes');
-                            Log::debug($cache_file_name . ' - ' . $cache_size . ' - date: ' . date(DATE_RFC822, $modified_time));
-                            Log::debug($pretty_name . ' - ' . $pretty_size . ' - date: ' . date(DATE_RFC822, $real_file_modified_time));
-                            $new_or_updated = true;
-                        }
+            }
+            $pretty_name = public_path($file_name);
+            if ($param_checksize && !$is_animated_gif && !$is_fallback) {
+                // If enabled, check also for file size changes
+                if (!$new_or_updated && file_exists($pretty_name)) {
+                    $cache_size = filesize($cache_file_name);
+                    $pretty_size = filesize($pretty_name);
+                    if ($cache_size != $pretty_size) {
+                        Log::debug('Cdn: image size changes');
+                        Log::debug($cache_file_name . ' - ' . $cache_size . ' - date: ' . date(DATE_RFC822, $modified_time));
+                        Log::debug($pretty_name . ' - ' . $pretty_size . ' - date: ' . date(DATE_RFC822, $real_file_modified_time));
+                        $new_or_updated = true;
                     }
                 }
-                if ($new_or_updated || !file_exists($pretty_name)) {
-                    $cache_file_name = $o_image->cacheFile($param_type, $param_quality);
-                    if ($is_animated_gif) {
-                        // ANIMATED GIF! Don't process with Gregwar/image and copy "as is"
-                        // <TODO> Extract and process any single frame
-                        // see https://stackoverflow.com/questions/718491/resize-animated-gif-file-without-destroying-animation
-                        // Simply copy the file
-                        $this->assureDirectoryExists($pretty_name);
-                        copy($real_file_name, $pretty_name);
-                    }
-                    else {
-                        // Copy the file from cache ... don't save it again - 2018-08-20 <PN>
-                        $this->assureDirectoryExists($pretty_name);
-                        copy($cache_file_name, $pretty_name);
-                        // $o_image->save($pretty_name, $param_type, $param_quality);
-                    }
-                    // Must be updated on CDN
-                    $new_or_updated = true;
-                    if ($is_fallback) {
-                        // Set a very old modification time for fallback images to allow overwrite next time
-                        touch($cache_file_name, 1000000);
-                    }
+            }
+            if ($new_or_updated || !file_exists($pretty_name)) {
+                $cache_file_name = $o_image->cacheFile($param_type, $param_quality);
+                if ($is_animated_gif) {
+                    // ANIMATED GIF! Don't process with Gregwar/image and copy "as is"
+                    // <TODO> Extract and process any single frame
+                    // see https://stackoverflow.com/questions/718491/resize-animated-gif-file-without-destroying-animation
+                    // Simply copy the file
+                    $this->assureDirectoryExists($pretty_name);
+                    copy($real_file_name, $pretty_name);
+                }
+                else {
+                    // Copy the file from cache ... don't save it again - 2018-08-20 <PN>
+                    $this->assureDirectoryExists($pretty_name);
+                    copy($cache_file_name, $pretty_name);
+                    // $o_image->save($pretty_name, $param_type, $param_quality);
+                }
+                // Must be updated on CDN
+                $new_or_updated = true;
+                if ($is_fallback) {
+                    // Set a very old modification time for fallback images to allow overwrite next time
+                    touch($cache_file_name, 1000000);
                 }
             }
             if ($new_or_updated && !$this->_provider->bypass()) {

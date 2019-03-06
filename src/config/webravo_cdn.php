@@ -122,7 +122,8 @@ return [
         ],
         'GoogleStorage' => [
             'bucket' => 'GS_bucket_name_here',
-            'ttl' => '86400'
+            'ttl' => '86400',
+            'url' => 'https://storage.googleapis.com'
         ]
     ],
 
