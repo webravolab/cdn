@@ -81,8 +81,13 @@ class Cdn implements CdnFacadeInterface
         }
         if (isset($this->_manifest[$path])) {
             $asset_path = 'build/' . $this->_manifest[$path];
-            $asset_url = $this->_helper->makeAssetUrl($asset_path);
-            return $asset_url;
+            // If bypass_assets is true, return the local assets
+            if (!$this->_helper->bypass_assets()) {
+                return $this->_helper->makeAssetUrl($asset_path);
+            }
+            else {
+                return '/' . $asset_path;
+            }
         }
         throw new \Exception("File {$path} not defined in asset manifest.");
     }
