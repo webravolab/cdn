@@ -126,7 +126,7 @@ or
 ##### CDN Provider Configuration
 
 For Webravo provider, you must define just your cdn url and specific url to upload assets.
-For Google Storage provider you must define the remote bucket name and default TTL.
+For Google Storage provider you must define the remote bucket name, the default TTL, and the storage URL to pre-pend to assets (including bucket name).
 
 ```php
 'providers' => [
@@ -135,8 +135,9 @@ For Google Storage provider you must define the remote bucket name and default T
         'upload_url' => 'https://www.my-cdn.com/cdn/upload',
     ],
     'GoogleStorage' => [
-        'bucket' => 'GS_bucket_name_here',
+        'bucket' => '<bucket>',
         'ttl' => '86400'
+        'url' => 'https://storage.googleapis.com/<bucket>',
     ]],
 ```
 

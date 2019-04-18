@@ -56,7 +56,7 @@ class GoogleStorageProvider extends CdnAbstractProvider implements CdnProviderIn
                             $this->_ttl = $providers['GoogleStorage']['ttl'];
                         }
                         if (isset($providers['GoogleStorage']['url'])) {
-                            $this->_cdn_url = $providers['GoogleStorage']['url'] . '/' . $this->_bucket;
+                            $this->_cdn_url = $providers['GoogleStorage']['url'];
                         }
                     }
                 }
