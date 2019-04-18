@@ -82,7 +82,7 @@ class Cdn implements CdnFacadeInterface
         if (isset($this->_manifest[$path])) {
             $asset_path = 'build/' . $this->_manifest[$path];
             // If bypass_assets is true, return the local assets
-            if (!$this->_helper->bypass_assets()) {
+            if (!$this->_helper->getProviderByPassAssets()) {
                 return $this->_helper->makeAssetUrl($asset_path);
             }
             else {
