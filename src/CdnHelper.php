@@ -344,7 +344,13 @@ class CdnHelper implements CdnHelperInterface
      */
     public function makeAssetUrl($file_name) {
         $this->initProvider();
-        return $this->_provider->getAssetUrl($file_name);
+        // If bypass_assets is true, return the local assets
+        if (!$this->_provider->bypass_assets) {
+            return $this->_provider->getAssetUrl($file_name);
+        }
+        else {
+            return '/' . $file_name;
+        }
     }
 
     /**

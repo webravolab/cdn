@@ -2,6 +2,21 @@
 return [
     /*
     |--------------------------------------------------------------------------
+    | Bypass loading images from the CDN
+    |--------------------------------------------------------------------------
+    |
+    | This option determines whether to load the images from localhost or from
+    | the CDN server. (this is useful during development).
+    | Set it to "true" to load from localhost, or set it to "false" to load
+    | from the CDN (on production).
+    |
+    | Default: false
+    |
+    */
+    'bypass' => false,
+
+    /*
+    |--------------------------------------------------------------------------
     | Bypass loading assets from the CDN
     |--------------------------------------------------------------------------
     |
@@ -13,8 +28,7 @@ return [
     | Default: false
     |
     */
-    'bypass' => false,
-
+    'bypass_assets' => false,
 
     /*
     |--------------------------------------------------------------------------

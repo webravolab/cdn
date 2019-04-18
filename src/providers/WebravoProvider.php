@@ -19,6 +19,7 @@ class WebravoProvider extends CdnAbstractProvider implements CdnProviderInterfac
     protected $_cdn_url;
     protected $_cdn_upload_url;
     protected $_bypass = false;
+    protected $_bypass_assets = false;
     protected $_overwrite = true;       // overwrite missing images - default true
     protected $_check_size = false;     // check changed images also by file size - default false
 
@@ -26,6 +27,9 @@ class WebravoProvider extends CdnAbstractProvider implements CdnProviderInterfac
         $this->_configuration = $configuration;
         if (isset($configuration['bypass'])) {
             $this->_bypass = $configuration['bypass'];
+        }
+        if (isset($configuration['bypass_assets'])) {
+            $this->_bypass_assets = $configuration['bypass_assets'];
         }
         if (isset($configuration['overwrite'])) {
             $this->_overwrite = $configuration['overwrite'];
@@ -54,6 +58,15 @@ class WebravoProvider extends CdnAbstractProvider implements CdnProviderInterfac
     public function bypass():bool
     {
         return $this->_bypass;
+    }
+
+    /**
+     * Return the current status of bypass_assets flag
+     * @return bool
+     */
+    public function bypass_assets():bool
+    {
+        return $this->_bypass_assets;
     }
 
     /**
