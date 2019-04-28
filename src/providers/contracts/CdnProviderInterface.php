@@ -19,4 +19,6 @@ interface CdnProviderInterface
     public function bypass_assets():bool;
     public function overwrite():bool;
     public function checksize():bool;
+    public function setBypass(bool $bypass);
+    public function setBypassAssets(bool $bypass_assets);
 }

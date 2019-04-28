@@ -2,6 +2,8 @@
 
 namespace Webravolab\Cdn\Contracts;
 
+use Webravolab\Cdn\Providers\Contracts\CdnProviderInterface;
+
 /**
  * Interface CdnFacadeInterface.
  *
@@ -15,4 +17,6 @@ interface CdnFacadeInterface
     public function upload($path, $remote_path = null);
 
     public function elixir($path);
+
+    public function getProviderInstance();
 }

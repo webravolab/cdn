@@ -42,6 +42,17 @@ class Cdn implements CdnFacadeInterface
     }
 
     /**
+     * Return the current provider instance
+     *
+     * @return CdnProviderInterface
+     */
+    public function getProviderInstance()
+    {
+        $this->init();
+        return $this->_provider;
+    }
+
+    /**
      * Return full URL of an image asset
      *
      * @param $path

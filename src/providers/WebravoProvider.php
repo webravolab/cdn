@@ -52,43 +52,6 @@ class WebravoProvider extends CdnAbstractProvider implements CdnProviderInterfac
     }
 
     /**
-     * Return the current status of bypass flag
-     * @return bool
-     */
-    public function bypass():bool
-    {
-        return $this->_bypass;
-    }
-
-    /**
-     * Return the current status of bypass_assets flag
-     * @return bool
-     */
-    public function bypass_assets():bool
-    {
-        return $this->_bypass_assets;
-    }
-
-    /**
-     * Return the current status of overwrite flag
-     * @return bool
-     */
-    public function overwrite():bool
-    {
-        return $this->_overwrite;
-    }
-
-    /**
-     * Return the current status of check_size flag
-     * @return bool
-     */
-    public function checksize():bool
-    {
-        return $this->_check_size;
-    }
-
-
-    /**
      * Upload one single file to CDN
      *
      * @param $path             file path absolute or relative to public directory
