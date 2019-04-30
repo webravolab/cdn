@@ -135,9 +135,10 @@ return [
             'upload_url' => 'http://www.cdn.test/cdn/upload',
         ],
         'GoogleStorage' => [
-            'bucket' => 'GS_bucket_name_here',
+            'bucket' => 'GS_bucket_name_here',              // Bucket to upload where
             'ttl' => '86400',
-            'url' => 'https://storage.googleapis.com'
+            'url' => 'https://storage.googleapis.com',
+            'cdn_bucket' => 'GS_bucket_name_here'           // Bucket (optionally including folder) to append to storage url
         ]
     ],
 

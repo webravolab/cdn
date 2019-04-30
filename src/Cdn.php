@@ -102,4 +102,11 @@ class Cdn implements CdnFacadeInterface
         }
         throw new \Exception("File {$path} not defined in asset manifest.");
     }
+
+    public function getRemoteImagePath($image_name)
+    {
+        $this->init();
+        return $this->_helper->makeAssetUrl($image_name);
+    }
+
 }

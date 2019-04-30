@@ -19,4 +19,6 @@ interface CdnFacadeInterface
     public function elixir($path);
 
     public function getProviderInstance();
+
+    public function getRemoteImagePath($image_name);
 }
