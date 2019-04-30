@@ -21,6 +21,7 @@ class GoogleStorageProvider extends CdnAbstractProvider implements CdnProviderIn
     protected $_log_service = null;
     protected $_configuration = null;
     protected $_cdn_url = null;
+    protected $_cdn_bucket = null;
     protected $_cdn_upload_url;
     protected $_bypass = false;
     protected $_bypass_assets = false;
@@ -58,12 +59,23 @@ class GoogleStorageProvider extends CdnAbstractProvider implements CdnProviderIn
                         if (isset($providers['GoogleStorage']['url'])) {
                             $this->_cdn_url = $providers['GoogleStorage']['url'];
                         }
+                        if (isset($providers['GoogleStorage']['cdn_bucket'])) {
+                            $this->_cdn_bucket = $providers['GoogleStorage']['cdn_bucket'];
+                        }
                     }
                 }
             }
         }
-        if (is_null($this->_cdn_url) && !empty($this->_bucket)) {
-            $this->_cdn_url = "https://storage.googleapis.com/" . $this->_bucket;
+        if (empty($this->_cdn_url)) {
+            $this->_cdn_url = "https://storage.googleapis.com";
+        }
+        if (empty($this->_cdn_bucket)) {
+            // If cdn bucket is not set ... use the same upload bucket
+            $this->_cdn_bucket = $this->_bucket;
+        }
+        if (stripos($this->_cdn_url, $this->_cdn_bucket) === false) {
+            // Append bucket to cdn url
+            $this->_cdn_url = $this->addTrailingSlashToPath($this->_cdn_url) . $this->_cdn_bucket;
         }
 
         // Initialize Google CDN Service
